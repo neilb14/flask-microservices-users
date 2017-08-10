@@ -19,6 +19,9 @@ def add_user():
         return jsonify(response_object), 400
     username = post_data.get('username')
     email = post_data.get('email')
+    if not username or not email:
+        response_object = {'status':'fail', 'message':'Invalid payload keys'}
+        return jsonify(response_object), 400
     db.session.add(User(username=username, email=email))
     db.session.commit()
     response_object = {
