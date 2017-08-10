@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from sqlalchemy import exc
 from project.api.models import User
 from project import db
 
@@ -22,10 +23,26 @@ def add_user():
     if not username or not email:
         response_object = {'status':'fail', 'message':'Invalid payload keys'}
         return jsonify(response_object), 400
-    db.session.add(User(username=username, email=email))
-    db.session.commit()
-    response_object = {
-        'status':'success',
-        'message':f'{email} was added!'
-    }
-    return jsonify(response_object), 201
+    try:
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            db.session.add(User(username=username, email=email))
+            db.session.commit()
+            response_object = {
+                'status':'success',
+                'message':f'{email} was added!'
+            }
+            return jsonify(response_object), 201
+        else:
+            response_object = {
+                'status':'fail',
+                'message':'User already exists'
+            }
+            return jsonify(response_object), 400
+    except exc.IntegrityError as e:
+        db.session.rollback()
+        response_object = {
+            'status': 'fail',
+            'message': 'Unknown error'
+        }
+        return jsonify(response_object), 400

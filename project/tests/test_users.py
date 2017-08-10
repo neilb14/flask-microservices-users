@@ -50,3 +50,20 @@ class TestUserService(BaseTestCase):
             self.assertEqual(response.status_code, 400)
             self.assertIn('Invalid payload keys', data['message'])
             self.assertIn('fail', data['status'])
+
+    def test_add_user_duplicate_user(self):
+        """Ensure error when user already exists"""
+        with self.client:
+            payload = json.dumps(dict(email="neilb14@mailinator.com",username="neilb14"))
+            self.client.post('/users',
+                            data = payload,
+                            content_type='application/json'
+                            )
+            response = self.client.post('/users',
+                                        data = payload,
+                                        content_type='application/json'
+                                        )
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('User already exists', data['message'])
+            self.assertIn('fail', data['status'])
