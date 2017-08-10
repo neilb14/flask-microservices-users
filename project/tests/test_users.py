@@ -26,3 +26,15 @@ class TestUserService(BaseTestCase):
             self.assertEqual(response.status_code, 201)
             self.assertIn('neilb14@mailinator.com was added!', data['message'])
             self.assertIn('success', data['status'])
+    
+    def test_add_user_invalid_payload(self):
+        """Ensure error when payload is empty"""
+        with self.client:
+            response = self.client.post('/users',
+                                        data = json.dumps(dict()),
+                                        content_type='application/json'
+                                        )
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('Invalid payload', data['message'])
+            self.assertIn('fail', data['status'])
