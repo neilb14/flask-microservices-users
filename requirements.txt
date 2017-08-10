@@ -14,3 +14,4 @@ Werkzeug==0.12.2
 wrapt==1.10.10
 Flask-SQLAlchemy==2.2
 psycopg2==2.7.1
+Flask-Testing==0.6.2
