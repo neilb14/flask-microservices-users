@@ -1,5 +1,8 @@
 import json
+from project import db
 from project.tests.base import BaseTestCase
+from project.api.models import User
+
 
 class TestUserService(BaseTestCase):
     """Tests for the Users Service."""
@@ -66,4 +69,28 @@ class TestUserService(BaseTestCase):
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
             self.assertIn('User already exists', data['message'])
+            self.assertIn('fail', data['status'])
+
+    def test_get_single_user(self):
+        user = User(username="neilb", email="neilb14@mailinator.com")
+        db.session.add(user)
+        db.session.commit()
+        with self.client:
+            response = self.client.get(f'/users/{user.id}')
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue('created_at' in data['data'])
+            self.assertIn('neilb', data['data']['username'])
+            self.assertIn('neilb14@mailinator.com', data['data']['email'])
+            self.assertIn('success', data['status'])
+
+    def test_get_single_user_no_id(self):
+        user = User(username="neilb", email="neilb14@mailinator.com")
+        db.session.add(user)
+        db.session.commit()
+        with self.client:
+            response = self.client.get('/users/blah')
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 404)
+            self.assertIn('User does not exist', data['message'])
             self.assertIn('fail', data['status'])
