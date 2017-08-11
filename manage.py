@@ -22,5 +22,11 @@ def test():
         return 0
     return 1
 
+@manager.command
+def seed_db():
+    db.session.add(User(username='neilb', email='neilb14@mailinator.com'))
+    db.session.add(User(username='juneau', email='juneau@mailinator.com'))
+    db.session.commit()
+
 if __name__ == '__main__':
     manager.run()
