@@ -94,3 +94,14 @@ class TestUserService(BaseTestCase):
             self.assertEqual(response.status_code, 404)
             self.assertIn('User does not exist', data['message'])
             self.assertIn('fail', data['status'])
+
+    def test_get_single_user_is_missing(self):
+        user = User(username="neilb", email="neilb14@mailinator.com")
+        db.session.add(user)
+        db.session.commit()
+        with self.client:
+            response = self.client.get('/users/999')
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 404)
+            self.assertEqual('User does not exist', data['message'])
+            self.assertEqual('fail', data['status'])
