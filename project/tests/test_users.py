@@ -91,7 +91,7 @@ class TestUserService(BaseTestCase):
 
     def test_get_single_user_no_id(self):
         """Ensure we can handle single user without id gracefully"""
-        user = add_user("neilb", "neilb14@mailinator.com")
+        add_user("neilb", "neilb14@mailinator.com")
         with self.client:
             response = self.client.get('/users/blah')
             data = json.loads(response.data.decode())
@@ -101,10 +101,25 @@ class TestUserService(BaseTestCase):
 
     def test_get_single_user_is_missing(self):
         """Ensure we handle single user with bad id gracefully"""
-        user = add_user("neilb", "neilb14@mailinator.com")
+        add_user("neilb", "neilb14@mailinator.com")
         with self.client:
             response = self.client.get('/users/999')
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 404)
-            self.assertEqual('User does not exist', data['message'])
-            self.assertEqual('fail', data['status'])
+            self.assertIn('User does not exist', data['message'])
+            self.assertIn('fail', data['status'])
+
+    def test_get_all_users(self):
+        """Ensure we can get all users"""
+        add_user('neilb', 'neilb14@mailinator.com')
+        add_user('juneau', 'juneau@mailinator.com')
+        with self.client:
+            response = self.client.get('/users')
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(data['data']['users']),2)
+            self.assertTrue('created_at' in data['data']['users'][0])
+            self.assertTrue('created_at' in data['data']['users'][1])
+            self.assertIn('neilb', data['data']['users'][0]['username'])
+            self.assertIn('juneau', data['data']['users'][1]['username'])
+            self.assertIn('success', data['status'])
