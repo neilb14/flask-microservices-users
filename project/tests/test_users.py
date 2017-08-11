@@ -1,8 +1,14 @@
+"""Tests for user service"""
 import json
 from project import db
 from project.tests.base import BaseTestCase
 from project.api.models import User
 
+def add_user(username, email):
+        user = User(username=username, email=email)
+        db.session.add(user)
+        db.session.commit()
+        return user
 
 class TestUserService(BaseTestCase):
     """Tests for the Users Service."""
@@ -72,9 +78,8 @@ class TestUserService(BaseTestCase):
             self.assertIn('fail', data['status'])
 
     def test_get_single_user(self):
-        user = User(username="neilb", email="neilb14@mailinator.com")
-        db.session.add(user)
-        db.session.commit()
+        """Ensure we can retrieve a single user"""
+        user = add_user("neilb", "neilb14@mailinator.com")
         with self.client:
             response = self.client.get(f'/users/{user.id}')
             data = json.loads(response.data.decode())
@@ -85,9 +90,8 @@ class TestUserService(BaseTestCase):
             self.assertIn('success', data['status'])
 
     def test_get_single_user_no_id(self):
-        user = User(username="neilb", email="neilb14@mailinator.com")
-        db.session.add(user)
-        db.session.commit()
+        """Ensure we can handle single user without id gracefully"""
+        user = add_user("neilb", "neilb14@mailinator.com")
         with self.client:
             response = self.client.get('/users/blah')
             data = json.loads(response.data.decode())
@@ -96,9 +100,8 @@ class TestUserService(BaseTestCase):
             self.assertIn('fail', data['status'])
 
     def test_get_single_user_is_missing(self):
-        user = User(username="neilb", email="neilb14@mailinator.com")
-        db.session.add(user)
-        db.session.commit()
+        """Ensure we handle single user with bad id gracefully"""
+        user = add_user("neilb", "neilb14@mailinator.com")
         with self.client:
             response = self.client.get('/users/999')
             data = json.loads(response.data.decode())
