@@ -141,4 +141,12 @@ class TestUserService(BaseTestCase):
         self.assertIn(b'<strong>neilb14</strong>', response.data)
         self.assertIn(b'<strong>juneau</strong>', response.data)
 
+    def test_main_add_user(self):
+        """Ensure add user form is working"""
+        response = self.client.post('/', data=dict(username='neilb14', email='neilb14@mailinator.com'),follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'<h1>All Users</h1>',response.data)
+        self.assertNotIn(b'No users',response.data)
+        self.assertIn(b'<strong>neilb14</strong>',response.data)
+
         
