@@ -130,3 +130,15 @@ class TestUserService(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'<h1>All Users</h1>', response.data)
         self.assertIn(b'<p>No users!</p>', response.data)
+
+    def test_main_with_users(self):
+        """Ensure we can return a list of users"""
+        add_user("neilb14", "neilb14@mailinator.com")
+        add_user("juneau", "juneau@mailinator.com")
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b'No users',response.data)
+        self.assertIn(b'<strong>neilb14</strong>', response.data)
+        self.assertIn(b'<strong>juneau</strong>', response.data)
+
+        
