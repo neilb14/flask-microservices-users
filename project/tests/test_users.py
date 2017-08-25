@@ -13,14 +13,6 @@ def add_user(username, email):
 class TestUserService(BaseTestCase):
     """Tests for the Users Service."""
 
-    def test_users(self):
-        """Ensure the /ping route behaves correctly."""
-        response = self.client.get('/ping')
-        data = json.loads(response.data.decode())
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('pong!', data['message'])
-        self.assertIn('success', data['status'])
-
     def test_add_user(self):
         """Ensure we can add a new user"""
         with self.client:
@@ -123,30 +115,3 @@ class TestUserService(BaseTestCase):
             self.assertIn('neilb', data['data']['users'][0]['username'])
             self.assertIn('juneau', data['data']['users'][1]['username'])
             self.assertIn('success', data['status'])
-
-    def test_main_no_users(self):
-        """Ensure the main route (index) behaves correctly when there are no users"""
-        response = self.client.get('/')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'<h1>All Users</h1>', response.data)
-        self.assertIn(b'<p>No users!</p>', response.data)
-
-    def test_main_with_users(self):
-        """Ensure we can return a list of users"""
-        add_user("neilb14", "neilb14@mailinator.com")
-        add_user("juneau", "juneau@mailinator.com")
-        response = self.client.get('/')
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(b'No users',response.data)
-        self.assertIn(b'<strong>neilb14</strong>', response.data)
-        self.assertIn(b'<strong>juneau</strong>', response.data)
-
-    def test_main_add_user(self):
-        """Ensure add user form is working"""
-        response = self.client.post('/', data=dict(username='neilb14', email='neilb14@mailinator.com'),follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'<h1>All Users</h1>',response.data)
-        self.assertNotIn(b'No users',response.data)
-        self.assertIn(b'<strong>neilb14</strong>',response.data)
-
-        
