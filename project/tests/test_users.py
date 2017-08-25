@@ -1,11 +1,11 @@
 """Tests for user service"""
-import json
+import json,datetime
 from project import db
 from project.tests.base import BaseTestCase
 from project.api.models import User
 
-def add_user(username, email):
-        user = User(username=username, email=email)
+def add_user(username, email, created_at=datetime.datetime.utcnow()):
+        user = User(username=username, email=email, created_at=created_at)
         db.session.add(user)
         db.session.commit()
         return user
@@ -103,7 +103,8 @@ class TestUserService(BaseTestCase):
 
     def test_get_all_users(self):
         """Ensure we can get all users"""
-        add_user('neilb', 'neilb14@mailinator.com')
+        created_30_days_ago = datetime.datetime.utcnow() + datetime.timedelta(-30)
+        add_user('neilb', 'neilb14@mailinator.com', created_30_days_ago)
         add_user('juneau', 'juneau@mailinator.com')
         with self.client:
             response = self.client.get('/users')
@@ -112,6 +113,6 @@ class TestUserService(BaseTestCase):
             self.assertEqual(len(data['data']['users']),2)
             self.assertTrue('created_at' in data['data']['users'][0])
             self.assertTrue('created_at' in data['data']['users'][1])
-            self.assertIn('neilb', data['data']['users'][0]['username'])
-            self.assertIn('juneau', data['data']['users'][1]['username'])
+            self.assertIn('juneau', data['data']['users'][0]['username'])
+            self.assertIn('neilb', data['data']['users'][1]['username'])
             self.assertIn('success', data['status'])
