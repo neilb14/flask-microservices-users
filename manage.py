@@ -35,8 +35,8 @@ def test():
 
 @manager.command
 def seed_db():
-    db.session.add(User(username='neilb', email='neilb14@mailinator.com'))
-    db.session.add(User(username='juneau', email='juneau@mailinator.com'))
+    db.session.add(User(username='neilb', email='neilb14@mailinator.com', password='password123'))
+    db.session.add(User(username='juneau', email='juneau@mailinator.com', password='password123'))
     db.session.commit()
 
 @manager.command
