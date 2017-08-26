@@ -1,3 +1,5 @@
+![Build Status](https://travis-ci.org/neilb14/flask-microservices-users.svg?branch=master)
+
 ## Build and run commands in container ##
 You can grab the IP address of the machine
 ```$ docker-machine ip dev```
