@@ -12,12 +12,13 @@ export DATABASE_TEST_URL=xxx
 ```
 
 ## Tests
-Run tests:
-```python manage.py test```
+Run tests: ```python manage.py test```
 
 ## Database
-Create the database:
-```python manage.py recreate_db```
+Create the database: ```python manage.py recreate_db```
+
+Seed the database with some users: ```python manage.py seed_db```
+
 
 ## Migrations
 After changing a model:
