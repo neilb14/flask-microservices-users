@@ -5,7 +5,7 @@ from project.tests.base import BaseTestCase
 from project.api.models import User
 
 def add_user(username, email, created_at=datetime.datetime.utcnow()):
-        user = User(username=username, email=email, created_at=created_at)
+        user = User(username=username, email=email, password='password123', created_at=created_at)
         db.session.add(user)
         db.session.commit()
         return user

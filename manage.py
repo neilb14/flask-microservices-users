@@ -2,6 +2,7 @@ import unittest, coverage
 from flask_script import Manager
 from project import create_app,db
 from project.api.models import User
+from flask_migrate import MigrateCommand
 
 COV = coverage.coverage(
     branch=True,
@@ -14,6 +15,7 @@ COV.start()
 
 app = create_app()
 manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 @manager.command
 def recreate_db():
