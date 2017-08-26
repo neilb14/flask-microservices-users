@@ -5,9 +5,10 @@ Remember that Docker container's build context is the Github remote master branc
 
 ## Variables
 Set the following environment variables:
-```export SECRET_KEY=xxx```
-```export DATABASE_URL=xxx```
-```export DATABASE_TEST_URL=xxx```
+```export SECRET_KEY=xxx
+export DATABASE_URL=xxx
+export DATABASE_TEST_URL=xxx
+```
 
 ## Tests
 Run tests:
