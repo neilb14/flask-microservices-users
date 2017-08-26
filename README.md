@@ -1,23 +1,23 @@
 ![Build Status](https://travis-ci.org/neilb14/flask-microservices-users.svg?branch=master)
 
-##Env Cheatsheet##
+# Env Cheatsheet
 Remember that Docker container's build context is the Github remote master branch. So you gotta push your changes and rebuild containers in order for them to work.
 
-###Variables###
+## Variables
 Set the following environment variables:
 ```export SECRET_KEY=xxx```
 ```export DATABASE_URL=xxx```
 ```export DATABASE_TEST_URL=xxx```
 
-###Tests###
+## Tests
 Run tests:
 ```python manage.py test```
 
-###Database###
+## Database
 Create the database:
 ```python manage.py recreate_db```
 
-###Migrations###
+## Migrations
 After changing a model:
 ```
 python manage.py db migrate
