@@ -49,3 +49,39 @@ def register_user():
             'message': 'Invalid payload.'
         }
         return jsonify(response_object), 400
+
+@auth_blueprint.route('/auth/login', methods=['POST'])
+def login_user():
+    post_data = request.get_json()
+    if not post_data:
+        response_object = {
+            'status': 'error',
+            'message': 'Invalid payload.'
+        }
+        return jsonify(response_object)
+    email = post_data.get('email')
+    password = post_data.get('password')
+    try:
+        user = User.query.filter_by(email=email).first()
+        if user and bcrypt.check_password_hash(user.password, password):
+            auth_token = user.encode_auth_token(user.id)
+            if(auth_token):
+                response_object = {
+                    'status': 'success',
+                    'message': 'Successfully logged in.',
+                    'auth_token': auth_token.decode()
+                }
+                return jsonify(response_object), 200
+        else:
+            response_object = {
+                'status': 'error',
+                'message': 'User does not exist.'
+            }
+            return jsonify(response_object), 404
+    except Exception as e:
+        print(e)
+        response_object = {
+            'status': 'error',
+            'message': 'Try Again.'
+        }
+        return jsonify(response_object), 500
