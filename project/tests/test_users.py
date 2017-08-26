@@ -3,12 +3,7 @@ import json,datetime
 from project import db
 from project.tests.base import BaseTestCase
 from project.api.models import User
-
-def add_user(username, email, created_at=datetime.datetime.utcnow()):
-        user = User(username=username, email=email, password='password123', created_at=created_at)
-        db.session.add(user)
-        db.session.commit()
-        return user
+from project.tests.utils import add_user
 
 class TestUserService(BaseTestCase):
     """Tests for the Users Service."""
@@ -19,7 +14,8 @@ class TestUserService(BaseTestCase):
             response = self.client.post('/users', 
                                         data=json.dumps(dict(
                                             username="neil",
-                                            email="neilb14@mailinator.com"
+                                            email="neilb14@mailinator.com",
+                                            password="password123"
                                         )),
                                         content_type='application/json'
                                         )
@@ -52,10 +48,10 @@ class TestUserService(BaseTestCase):
             self.assertIn('Invalid payload keys', data['message'])
             self.assertIn('fail', data['status'])
 
-    def test_add_user_duplicate_user(self):
-        """Ensure error when user already exists"""
+    def test_add_user_duplicate_email(self):
+        """Ensure error when user with email already exists"""
         with self.client:
-            payload = json.dumps(dict(email="neilb14@mailinator.com",username="neilb14"))
+            payload = json.dumps(dict(email="neilb14@mailinator.com",username="neilb14",password="password123"))
             self.client.post('/users',
                             data = payload,
                             content_type='application/json'
@@ -104,7 +100,7 @@ class TestUserService(BaseTestCase):
     def test_get_all_users(self):
         """Ensure we can get all users"""
         created_30_days_ago = datetime.datetime.utcnow() + datetime.timedelta(-30)
-        add_user('neilb', 'neilb14@mailinator.com', created_30_days_ago)
+        add_user('neilb', 'neilb14@mailinator.com', 'password123', created_30_days_ago)
         add_user('juneau', 'juneau@mailinator.com')
         with self.client:
             response = self.client.get('/users')
@@ -116,3 +112,15 @@ class TestUserService(BaseTestCase):
             self.assertIn('juneau', data['data']['users'][0]['username'])
             self.assertIn('neilb', data['data']['users'][1]['username'])
             self.assertIn('success', data['status'])
+
+    def test_add_users_invalid_json_keys_no_password(self):
+        """Ensure we get an error when no password passed in"""
+        with self.client:
+            response = self.client.post('/users',
+                                        data = json.dumps(dict(email="neilb14@mailinator.com", username="neilb14")),
+                                        content_type='application/json'
+                                        )
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('Invalid payload keys', data['message'])
+            self.assertIn('fail', data['status'])

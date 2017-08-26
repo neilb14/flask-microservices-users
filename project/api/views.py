@@ -13,13 +13,14 @@ def add_user():
         return jsonify(response_object), 400
     username = post_data.get('username')
     email = post_data.get('email')
-    if not username or not email:
+    password = post_data.get('password')
+    if not username or not email or not password:
         response_object = {'status':'fail', 'message':'Invalid payload keys'}
         return jsonify(response_object), 400
     try:
         user = User.query.filter_by(email=email).first()
         if not user:
-            db.session.add(User(username=username, email=email, password='pwd123'))
+            db.session.add(User(username=username, email=email, password=password))
             db.session.commit()
             response_object = {
                 'status':'success',

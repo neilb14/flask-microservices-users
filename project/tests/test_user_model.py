@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from project import db
 from project.api.models import User
 from project.tests.base import BaseTestCase
+from project.tests.utils import add_user
 
 class TestUserModel(BaseTestCase):
     def test_add_user(self):
@@ -20,13 +21,7 @@ class TestUserModel(BaseTestCase):
         self.assertTrue(user.created_at)
 
     def test_add_user_duplicate_username(self):
-        user = User(
-            username='juneau',
-            email='juneau@dog.com',
-            password='password123'
-        )
-        db.session.add(user)
-        db.session.commit()
+        add_user('juneau', 'juneau@dog.com')
         duplicate_user = User(
             username='juneau',
             email='juneau@dog4ever.com',
@@ -36,13 +31,7 @@ class TestUserModel(BaseTestCase):
         self.assertRaises(IntegrityError, db.session.commit)
 
     def test_add_user_duplicate_email(self):
-        user = User(
-            username='juneau',
-            email='juneau@dog.com',
-            password='password123'
-        )
-        db.session.add(user)
-        db.session.commit()
+        add_user('juneau', 'juneau@dog.com')
         duplicate_user = User(
             username='juneau123',
             email='juneau@dog.com',
@@ -50,3 +39,8 @@ class TestUserModel(BaseTestCase):
         )
         db.session.add(duplicate_user)
         self.assertRaises(IntegrityError, db.session.commit)
+
+    def test_passwords_are_random(self):
+        user_one = add_user('juneau', 'juneau@dog.com', 'password123')
+        user_two = add_user('jersey', 'jersey@cat.com', 'password123')
+        self.assertNotEqual(user_one.password, user_two.password)
