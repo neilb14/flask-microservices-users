@@ -1,16 +1,25 @@
 ![Build Status](https://travis-ci.org/neilb14/flask-microservices-users.svg?branch=master)
 
-## Build and run commands in container ##
-You can grab the IP address of the machine
-```$ docker-machine ip dev```
+##Env Cheatsheet##
+Remember that Docker container's build context is the Github remote master branch. So you gotta push your changes and rebuild containers in order for them to work.
 
-And some various commands to create the environment and database:
-```docker-compose up -d --build
-docker-compose run users-service python manage.py recreate_db
-docker exec -ti (docker ps -aqf "name=users-db") psql -U postgres
+###Variables###
+Set the following environment variables:
+```export SECRET_KEY=xxx```
+```export DATABASE_URL=xxx```
+```export DATABASE_TEST_URL=xxx```
+
+###Tests###
+Run tests:
+```python manage.py test```
+
+###Database###
+Create the database:
+```python manage.py recreate_db```
+
+###Migrations###
+After changing a model:
 ```
-
-
-## Run Tests ##
-```docker-compose run users-service python manage.py test
+python manage.py db migrate
+python manage.py db upgrade
 ```
