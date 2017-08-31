@@ -98,6 +98,13 @@ def logout_user():
     auth_token = auth_header.split(" ")[1]
     resp = User.decode_auth_token(auth_token)
     if not isinstance(resp, str):
+        user = User.query.filter_by(id=resp).first()
+        if not user or not user.active:
+            response_obj = {
+                'status' : 'error',
+                'message' : 'Something went wrong. Please contact us.'
+            }
+            return jsonify(response_obj), 401
         response_object = {
             'status':'success',
             'message':'Successfully logged out.'
