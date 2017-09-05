@@ -11,7 +11,9 @@ def add_user(username, email, password='password123', created_at=datetime.dateti
         return user
 
 def login_test_user(client):
-        add_user('test_user','test@user.com')
+        user = add_user('test_user', 'test@user.com')
+        user.admin = True
+        db.session.commit()
         resp_login = client.post('/auth/login',
                 data=json.dumps(dict(email='test@user.com',password='password123')),
                 content_type='application/json'
