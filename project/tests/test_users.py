@@ -3,7 +3,7 @@ import json,datetime
 from project import db
 from project.tests.base import BaseTestCase
 from project.api.models import User
-from project.tests.utils import add_user
+from project.tests.utils import add_user, login_test_user
 
 class TestUserService(BaseTestCase):
     """Tests for the Users Service."""
@@ -11,13 +11,15 @@ class TestUserService(BaseTestCase):
     def test_add_user(self):
         """Ensure we can add a new user"""
         with self.client:
+            auth_header = login_test_user(self.client)
             response = self.client.post('/users', 
                                         data=json.dumps(dict(
                                             username="neil",
                                             email="neilb14@mailinator.com",
                                             password="password123"
                                         )),
-                                        content_type='application/json'
+                                        content_type='application/json',
+                                        headers=auth_header
                                         )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 201)
@@ -27,9 +29,11 @@ class TestUserService(BaseTestCase):
     def test_add_user_invalid_payload(self):
         """Ensure error when payload is empty"""
         with self.client:
+            auth_headers = login_test_user(self.client)
             response = self.client.post('/users',
                                         data = json.dumps(dict()),
-                                        content_type='application/json'
+                                        content_type='application/json',
+                                        headers = auth_headers
                                         )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
@@ -39,9 +43,11 @@ class TestUserService(BaseTestCase):
     def test_add_user_invalid_payload_keys(self):
         """Ensure error when payload is malformed"""
         with self.client:
+            auth_header = login_test_user(self.client)
             response = self.client.post('/users',
                                         data = json.dumps(dict(email="neilb14@mailinator.com")),
-                                        content_type='application/json'
+                                        content_type='application/json',
+                                        headers=auth_header
                                         )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
@@ -51,14 +57,17 @@ class TestUserService(BaseTestCase):
     def test_add_user_duplicate_email(self):
         """Ensure error when user with email already exists"""
         with self.client:
+            auth_headers = login_test_user(self.client)
             payload = json.dumps(dict(email="neilb14@mailinator.com",username="neilb14",password="password123"))
             self.client.post('/users',
                             data = payload,
-                            content_type='application/json'
+                            content_type='application/json',
+                            headers = auth_headers
                             )
             response = self.client.post('/users',
                                         data = payload,
-                                        content_type='application/json'
+                                        content_type='application/json',
+                                        headers = auth_headers
                                         )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
@@ -116,11 +125,48 @@ class TestUserService(BaseTestCase):
     def test_add_users_invalid_json_keys_no_password(self):
         """Ensure we get an error when no password passed in"""
         with self.client:
+            auth_header = login_test_user(self.client)
             response = self.client.post('/users',
-                                        data = json.dumps(dict(email="neilb14@mailinator.com", username="neilb14")),
-                                        content_type='application/json'
-                                        )
+                data = json.dumps(dict(email="neilb14@mailinator.com", username="neilb14")),
+                content_type='application/json',
+                headers=auth_header
+            )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
             self.assertIn('Invalid payload keys', data['message'])
             self.assertIn('fail', data['status'])
+
+    def test_add_user_inactive(self):
+        add_user('test', 'test@test.com', 'test')
+        # update user
+        user = User.query.filter_by(email='test@test.com').first()
+        user.active = False
+        db.session.commit()
+        with self.client:
+            resp_login = self.client.post(
+                '/auth/login',
+                data=json.dumps(dict(
+                    email='test@test.com',
+                    password='test'
+                )),
+                content_type='application/json'
+            )
+            response = self.client.post(
+                '/users',
+                data=json.dumps(dict(
+                    username='michael',
+                    email='michael@realpython.com',
+                    password='test'
+                )),
+                content_type='application/json',
+                headers=dict(
+                    Authorization='Bearer ' + json.loads(
+                        resp_login.data.decode()
+                    )['auth_token']
+                )
+            )
+            data = json.loads(response.data.decode())
+            self.assertTrue(data['status'] == 'error')
+            self.assertTrue(
+                data['message'] == 'Something went wrong. Please contact us.')
+            self.assertEqual(response.status_code, 401)
